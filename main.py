@@ -1,18 +1,38 @@
 import os
 import discord
 from discord.ext import commands
-import openai
-from dotenv import load_dotenv  # Import load_dotenv để tải biến môi trường
+import requests
+from dotenv import load_dotenv
 
 # Tải biến môi trường
 load_dotenv()
-openai.api_key = os.getenv("XAI_API_KEY")  # Sử dụng API key của xAI
-openai.api_base = "https://api.x.ai/v1"  # Endpoint của API Grok
+XAI_API_KEY = os.getenv("XAI_API_KEY")
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 # Cấu hình bot
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# URL endpoint của API Grok
+API_URL = "https://api.x.ai/v1/chat/completions"
+
+# Hàm gọi API Grok
+def get_grok_response(message):
+    headers = {
+        "Authorization": f"Bearer {XAI_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "grok-beta",  # Mô hình Grok beta, có thể thay bằng "grok-3" nếu hỗ trợ
+        "messages": [{"role": "user", "content": message}],
+        "max_tokens": 150  # Giới hạn độ dài phản hồi
+    }
+    response = requests.post(API_URL, json=data, headers=headers)
+    if response.status_code == 200:
+        return response.json()["choices"][0]["message"]["content"]
+    else:
+        return f"Lỗi API: {response.status_code} - {response.text}"
 
 # Sự kiện khi bot sẵn sàng
 @bot.event
@@ -28,11 +48,8 @@ async def start(ctx):
 @bot.command()
 async def ask(ctx, *, question):
     try:
-        response = openai.ChatCompletion.create(
-            model="grok-beta",  # Mô hình Grok beta
-            messages=[{"role": "user", "content": question}]
-        )
-        await ctx.send(response.choices[0].message.content)
+        response = get_grok_response(question)
+        await ctx.send(response)
     except Exception as e:
         await ctx.send(f"Lỗi: {str(e)}")
 
@@ -43,14 +60,11 @@ async def on_message(message):
         return
     if not message.content.startswith("!"):
         try:
-            response = openai.ChatCompletion.create(
-                model="grok-beta",
-                messages=[{"role": "user", "content": message.content}]
-            )
-            await message.channel.send(response.choices[0].message.content)
+            response = get_grok_response(message.content)
+            await message.channel.send(response)
         except Exception as e:
             await message.channel.send(f"Lỗi: {str(e)}")
     await bot.process_commands(message)
 
 # Chạy bot
-bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+bot.run(DISCORD_BOT_TOKEN)
