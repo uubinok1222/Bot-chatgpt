@@ -7,17 +7,32 @@ jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run bot
+          echo "Dependencies installed successfully"
+
+      - name: Run bot with logging
         env:
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}  # Truyền XAI_API_KEY
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-        run: python main.py
+        run: |
+          echo "Starting bot with XAI_API_KEY and DISCORD_BOT_TOKEN set"
+          python main.py >> bot.log 2>&1
+          cat bot.log
+
+      - name: Upload log on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: bot-log
+          path: bot.log
