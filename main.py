@@ -1,12 +1,13 @@
 import os
 import discord
 from discord.ext import commands
-import openai  # Sử dụng OpenAI SDK, tương thích với Grok
+import openai
+from dotenv import load_dotenv  # Import load_dotenv để tải biến môi trường
 
 # Tải biến môi trường
 load_dotenv()
-openai.api_key = os.getenv("XAI_API_KEY")  # Thay bằng XAI_API_KEY
-openai.api_base = "https://api.x.ai/v1"  # Endpoint của Grok API
+openai.api_key = os.getenv("XAI_API_KEY")  # Sử dụng API key của xAI
+openai.api_base = "https://api.x.ai/v1"  # Endpoint của API Grok
 
 # Cấu hình bot
 intents = discord.Intents.default()
@@ -28,7 +29,7 @@ async def start(ctx):
 async def ask(ctx, *, question):
     try:
         response = openai.ChatCompletion.create(
-            model="grok-beta",  # Sử dụng mô hình Grok beta
+            model="grok-beta",  # Mô hình Grok beta
             messages=[{"role": "user", "content": question}]
         )
         await ctx.send(response.choices[0].message.content)
