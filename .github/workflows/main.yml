@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
@@ -23,7 +23,7 @@ jobs:
 
       - name: Run bot with logging
         env:
-          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}  # Truyền XAI_API_KEY
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
         run: |
           echo "Starting bot with XAI_API_KEY and DISCORD_BOT_TOKEN set"
@@ -32,7 +32,7 @@ jobs:
 
       - name: Upload log on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bot-log
           path: bot.log
