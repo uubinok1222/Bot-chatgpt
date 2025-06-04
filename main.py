@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"Bot đã đăng nhập: {bot.user}")
-    channel = bot.get_channel(YOUR_CHANNEL_ID)  # Thay YOUR_CHANNEL_ID
+    channel = bot.get_channel(1283730671059206157)  # Thay YOUR_CHANNEL_ID
     if channel:
         await channel.send(f"Bot {bot.user} đã khởi động!")
 
